@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
+import { animals } from './data/animals';
+import { AnimalCard } from './components/AnimalCard';
+import { useSwipe } from './hooks/useSwipe';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
-import { animals } from './data/animals';
-import { AnimalCard } from './components/AnimalCard';
-import { useSwipe } from './hooks/useSwipe';
 
 const TOTAL = animals.length;
 
