@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Animal } from '../data/animals';
 
 interface Props {
@@ -7,20 +7,64 @@ interface Props {
 }
 
 export function AnimalCard({ animal, lang }: Props) {
-  const [tapped, setTapped] = useState(false);
+  const [nameTapped,    setNameTapped]   = useState(false);
+  const [soundPlaying,  setSoundPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleTap = () => {
-    if (!window.speechSynthesis) return;
+  // Stop all audio when this card unmounts (page swipe)
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
+
+  const handleNameTap = () => {
+    if (nameTapped || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const text = lang === 'en' ? animal.nameEn : animal.nameMm;
-    const locale = lang === 'en' ? 'en-US' : 'my-MM';
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = locale;
-    utt.rate = 0.75;
-    setTapped(true);
-    utt.onend = () => setTapped(false);
-    utt.onerror = () => setTapped(false);
+    setNameTapped(true);
+    const utt = new SpeechSynthesisUtterance(
+      lang === 'en' ? animal.nameEn : animal.nameMm
+    );
+    utt.lang  = lang === 'en' ? 'en-US' : 'my-MM';
+    utt.rate  = 0.75;
+    utt.pitch = 1.0;
+    utt.onend = utt.onerror = () => setNameTapped(false);
     window.speechSynthesis.speak(utt);
+  };
+
+  const playTTSFallback = () => {
+    if (!window.speechSynthesis) { setSoundPlaying(false); return; }
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(animal.sound);
+    utt.lang  = 'en-US';
+    utt.pitch = animal.pitch ?? 1.2;
+    utt.rate  = 1.0;
+    utt.onend = utt.onerror = () => setSoundPlaying(false);
+    window.speechSynthesis.speak(utt);
+  };
+
+  const handleEmojiTap = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    if (soundPlaying) return;
+    setSoundPlaying(true);
+
+    // stop any previous audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(`/sounds/${animal.id}.mp3`);
+    audioRef.current = audio;
+
+    audio.onended = () => setSoundPlaying(false);
+    audio.onerror = () => playTTSFallback(); // file missing → TTS fallback
+
+    audio.play().catch(() => playTTSFallback());
   };
 
   const primary   = lang === 'en' ? animal.nameEn : animal.nameMm;
@@ -28,30 +72,27 @@ export function AnimalCard({ animal, lang }: Props) {
 
   return (
     <div
-      className="w-full h-full rounded-3xl flex flex-col items-center justify-between py-10 px-6 cursor-pointer shadow-xl"
+      className="w-full h-full rounded-3xl flex flex-col items-center justify-between py-10 px-6 shadow-xl cursor-pointer"
       style={{
         backgroundColor: animal.bg,
-        transform: tapped ? 'scale(0.97)' : 'scale(1)',
+        transform: nameTapped ? 'scale(0.97)' : 'scale(1)',
         transition: 'transform 0.12s ease',
       }}
-      onClick={handleTap}
+      onClick={handleNameTap}
     >
-      {/* Primary name */}
-      <p
-        key={`primary-${lang}`}
-        className="fade-up text-5xl font-bold text-gray-800 tracking-tight select-none text-center"
-      >
+      <p key={`p-${lang}`} className="fade-up text-5xl font-bold text-gray-800 tracking-tight select-none text-center">
         {primary}
       </p>
 
-      {/* Emoji */}
-      <span className="text-[12rem] leading-none select-none">{animal.emoji}</span>
-
-      {/* Secondary name */}
-      <p
-        key={`secondary-${lang}`}
-        className="fade-up text-2xl text-gray-400 select-none text-center"
+      <span
+        className={`leading-none select-none cursor-pointer text-[12rem] ${soundPlaying ? 'bounce-play' : ''}`}
+        onClick={handleEmojiTap}
+        onTouchStart={handleEmojiTap}
       >
+        {animal.emoji}
+      </span>
+
+      <p key={`s-${lang}`} className="fade-up text-2xl text-gray-400 select-none text-center">
         {secondary}
       </p>
     </div>
