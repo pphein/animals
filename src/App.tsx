@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 import { animals } from './data/animals';
 import { AnimalCard } from './components/AnimalCard';
 import { useSwipe } from './hooks/useSwipe';
@@ -8,6 +13,23 @@ const TOTAL = animals.length;
 export default function App() {
   const [page, setPage]       = useState(0);
   const [lang, setLang]       = useState<'en' | 'mm'>('en');
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setInstallPrompt(null);
+  };
   const [slideClass, setSlide] = useState('slide-from-right');
   const [animKey, setAnimKey]  = useState(0);
 
@@ -33,6 +55,21 @@ export default function App() {
           <h1 className="text-xl font-bold text-gray-800 leading-tight">Animal Game</h1>
           <p className="text-xs text-gray-400">{page + 1} of {TOTAL}</p>
         </div>
+
+        {/* Install button — Android only, shown when prompt is available */}
+        {installPrompt && (
+          <button
+            onClick={handleInstall}
+            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow transition-colors cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Install
+          </button>
+        )}
 
         {/* Language toggle */}
         <div className="flex bg-gray-100 rounded-full p-1 gap-1">
