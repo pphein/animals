@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Animal } from '../data/animals';
+import type { GameItem } from '../data/types';
 
 interface Props {
-  animal: Animal;
+  item: GameItem;
   lang: 'en' | 'mm';
 }
 
-export function AnimalCard({ animal, lang }: Props) {
+export function AnimalCard({ item, lang }: Props) {
   const [nameTapped,    setNameTapped]   = useState(false);
   const [soundPlaying,  setSoundPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -27,7 +27,7 @@ export function AnimalCard({ animal, lang }: Props) {
     window.speechSynthesis.cancel();
     setNameTapped(true);
     const utt = new SpeechSynthesisUtterance(
-      lang === 'en' ? animal.nameEn : animal.nameMm
+      lang === 'en' ? item.nameEn : item.nameMm
     );
     utt.lang  = lang === 'en' ? 'en-US' : 'my-MM';
     utt.rate  = 0.75;
@@ -39,9 +39,9 @@ export function AnimalCard({ animal, lang }: Props) {
   const playTTSFallback = () => {
     if (!window.speechSynthesis) { setSoundPlaying(false); return; }
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(animal.sound);
+    const utt = new SpeechSynthesisUtterance(item.sound);
     utt.lang  = 'en-US';
-    utt.pitch = animal.pitch ?? 1.2;
+    utt.pitch = item.pitch ?? 1.2;
     utt.rate  = 1.0;
     utt.onend = utt.onerror = () => setSoundPlaying(false);
     window.speechSynthesis.speak(utt);
@@ -58,7 +58,7 @@ export function AnimalCard({ animal, lang }: Props) {
       audioRef.current.currentTime = 0;
     }
 
-    const audio = new Audio(`/sounds/${animal.id}.mp3`);
+    const audio = new Audio(`/sounds/${item.id}.mp3`);
     audioRef.current = audio;
 
     audio.onended = () => setSoundPlaying(false);
@@ -67,14 +67,14 @@ export function AnimalCard({ animal, lang }: Props) {
     audio.play().catch(() => playTTSFallback());
   };
 
-  const primary   = lang === 'en' ? animal.nameEn : animal.nameMm;
-  const secondary = lang === 'en' ? animal.nameMm : animal.nameEn;
+  const primary   = lang === 'en' ? item.nameEn : item.nameMm;
+  const secondary = lang === 'en' ? item.nameMm : item.nameEn;
 
   return (
     <div
       className="w-full h-full rounded-3xl flex flex-col items-center justify-between py-10 px-6 shadow-xl cursor-pointer"
       style={{
-        backgroundColor: animal.bg,
+        backgroundColor: item.bg,
         transform: nameTapped ? 'scale(0.97)' : 'scale(1)',
         transition: 'transform 0.12s ease',
       }}
@@ -89,7 +89,7 @@ export function AnimalCard({ animal, lang }: Props) {
         onClick={handleEmojiTap}
         onTouchStart={handleEmojiTap}
       >
-        {animal.emoji}
+        {item.emoji}
       </span>
 
       <p key={`s-${lang}`} className="fade-up text-2xl text-gray-400 select-none text-center">

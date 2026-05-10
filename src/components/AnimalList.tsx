@@ -1,12 +1,14 @@
-import { animals } from '../data/animals';
+import type { GameItem } from '../data/types';
 
 interface Props {
+  items: GameItem[];
+  title: string;
   lang: 'en' | 'mm';
   onSelect: (index: number) => void;
   onBack: () => void;
 }
 
-export function AnimalList({ lang, onSelect, onBack }: Props) {
+export function AnimalList({ items, title, lang, onSelect, onBack }: Props) {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col select-none">
       {/* Header */}
@@ -20,24 +22,24 @@ export function AnimalList({ lang, onSelect, onBack }: Props) {
           </svg>
         </button>
         <div>
-          <h1 className="text-xl font-bold text-gray-800 leading-tight">Animals</h1>
-          <p className="text-xs text-gray-400">{animals.length} animals</p>
+          <h1 className="text-xl font-bold text-gray-800 leading-tight">{title}</h1>
+          <p className="text-xs text-gray-400">{items.length} items</p>
         </div>
       </header>
 
       {/* Grid */}
       <main className="flex-1 overflow-y-auto px-4 pb-6">
         <div className="grid grid-cols-3 gap-3">
-          {animals.map((animal, index) => (
+          {items.map((item, index) => (
             <button
-              key={animal.id}
+              key={item.id}
               onClick={() => onSelect(index)}
               className="flex flex-col items-center justify-center gap-1.5 rounded-2xl py-4 px-2 shadow-sm active:scale-95 transition-transform cursor-pointer"
-              style={{ backgroundColor: animal.bg }}
+              style={{ backgroundColor: item.bg }}
             >
-              <span className="text-4xl leading-none">{animal.emoji}</span>
+              <span className="text-4xl leading-none">{item.emoji}</span>
               <span className="text-xs font-semibold text-gray-700 text-center leading-tight">
-                {lang === 'en' ? animal.nameEn : animal.nameMm}
+                {lang === 'en' ? item.nameEn : item.nameMm}
               </span>
             </button>
           ))}

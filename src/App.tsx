@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { animals } from './data/animals';
+import { fruits } from './data/fruits';
 import { HomePage } from './components/HomePage';
 import { AnimalList } from './components/AnimalList';
 import { AnimalGame } from './components/AnimalGame';
@@ -8,13 +10,13 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Screen = 'home' | 'animalList' | 'animalGame';
+type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame';
 
 export default function App() {
-  const [screen, setScreen]             = useState<Screen>('home');
-  const [selectedAnimal, setSelectedAnimal] = useState(0);
-  const [lang, setLang]                 = useState<'en' | 'mm'>('en');
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [screen, setScreen]                 = useState<Screen>('home');
+  const [selectedIndex, setSelectedIndex]   = useState(0);
+  const [lang, setLang]                     = useState<'en' | 'mm'>('en');
+  const [installPrompt, setInstallPrompt]   = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -35,9 +37,11 @@ export default function App() {
   if (screen === 'animalList') {
     return (
       <AnimalList
+        items={animals}
+        title="Animals"
         lang={lang}
         onBack={() => setScreen('home')}
-        onSelect={(index) => { setSelectedAnimal(index); setScreen('animalGame'); }}
+        onSelect={(i) => { setSelectedIndex(i); setScreen('animalGame'); }}
       />
     );
   }
@@ -45,9 +49,35 @@ export default function App() {
   if (screen === 'animalGame') {
     return (
       <AnimalGame
+        items={animals}
+        title="Animals"
         lang={lang}
-        initialPage={selectedAnimal}
+        initialPage={selectedIndex}
         onBack={() => setScreen('animalList')}
+      />
+    );
+  }
+
+  if (screen === 'fruitList') {
+    return (
+      <AnimalList
+        items={fruits}
+        title="Fruits"
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSelect={(i) => { setSelectedIndex(i); setScreen('fruitGame'); }}
+      />
+    );
+  }
+
+  if (screen === 'fruitGame') {
+    return (
+      <AnimalGame
+        items={fruits}
+        title="Fruits"
+        lang={lang}
+        initialPage={selectedIndex}
+        onBack={() => setScreen('fruitList')}
       />
     );
   }
@@ -96,7 +126,6 @@ export default function App() {
       </div>
 
       <HomePage lang={lang} onSelect={(id) => setScreen(id as Screen)} />
-
     </div>
   );
 }

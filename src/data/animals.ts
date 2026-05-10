@@ -1,12 +1,5 @@
-export interface Animal {
-  id: string;
-  nameEn: string;
-  nameMm: string;
-  emoji: string;
-  bg: string;
-  sound: string;   // onomatopoeia spoken on emoji tap
-  pitch?: number;  // TTS pitch override (default 1.2)
-}
+import type { GameItem } from './types';
+export type Animal = GameItem;
 
 export const animals: Animal[] = [
   // original 10

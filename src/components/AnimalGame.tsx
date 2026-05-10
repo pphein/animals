@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { animals } from '../data/animals';
+import type { GameItem } from '../data/types';
 import { AnimalCard } from './AnimalCard';
 import { useSwipe } from '../hooks/useSwipe';
 
-const TOTAL = animals.length;
-
 interface Props {
+  items: GameItem[];
+  title: string;
   lang: 'en' | 'mm';
   initialPage?: number;
   onBack: () => void;
 }
 
-export function AnimalGame({ lang, initialPage = 0, onBack }: Props) {
+export function AnimalGame({ items, title, lang, initialPage = 0, onBack }: Props) {
   const [page, setPage]           = useState(initialPage);
   const [slideClass, setSlide]    = useState('slide-from-right');
   const [animKey, setAnimKey]     = useState(0);
+
+  const total = items.length;
 
   const navigate = (next: number, dir: 'left' | 'right') => {
     setSlide(dir === 'left' ? 'slide-from-left' : 'slide-from-right');
@@ -22,7 +24,7 @@ export function AnimalGame({ lang, initialPage = 0, onBack }: Props) {
     setPage(next);
   };
 
-  const goNext = () => { if (page < TOTAL - 1) navigate(page + 1, 'left'); };
+  const goNext = () => { if (page < total - 1) navigate(page + 1, 'left'); };
   const goPrev = () => { if (page > 0)         navigate(page - 1, 'right'); };
 
   const swipe = useSwipe(goNext, goPrev);
@@ -50,8 +52,8 @@ export function AnimalGame({ lang, initialPage = 0, onBack }: Props) {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-800 leading-tight">Animals</h1>
-            <p className="text-xs text-gray-400">{page + 1} of {TOTAL}</p>
+            <h1 className="text-xl font-bold text-gray-800 leading-tight">{title}</h1>
+            <p className="text-xs text-gray-400">{page + 1} of {total}</p>
           </div>
         </div>
       </header>
@@ -59,7 +61,7 @@ export function AnimalGame({ lang, initialPage = 0, onBack }: Props) {
       {/* Card */}
       <main className="flex-1 min-h-0 px-5 pb-3">
         <div key={animKey} className={`h-full ${slideClass}`}>
-          <AnimalCard animal={animals[page]} lang={lang} />
+          <AnimalCard item={items[page]} lang={lang} />
         </div>
       </main>
     </div>
