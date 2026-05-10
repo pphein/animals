@@ -8,11 +8,8 @@ interface Props {
 
 // Priority-ordered list of high-quality British / clear English voices
 const GB_VOICE_NAMES = [
-  // macOS / iOS — highest quality neural voices
   'daniel', 'kate', 'serena', 'oliver',
-  // Chrome / Android
   'google uk english female', 'google uk english male',
-  // Windows
   'microsoft hazel', 'microsoft george', 'microsoft susan',
 ];
 
@@ -25,19 +22,11 @@ function loadVoices() {
 function pickBestEnglishVoice(): SpeechSynthesisVoice | null {
   const voices = voicesRef.list;
   if (!voices.length) return null;
-
-  // 1. Preferred high-quality British voices by name
   for (const hint of GB_VOICE_NAMES) {
     const v = voices.find(v => v.name.toLowerCase().includes(hint));
     if (v) return v;
   }
-
-  // 2. Any en-GB voice
-  const gb = voices.find(v => v.lang === 'en-GB');
-  if (gb) return gb;
-
-  // 3. Any en-US voice
-  return voices.find(v => v.lang.startsWith('en')) ?? null;
+  return voices.find(v => v.lang === 'en-GB') ?? voices.find(v => v.lang.startsWith('en')) ?? null;
 }
 
 export function AnimalCard({ item, lang }: Props) {
@@ -45,7 +34,6 @@ export function AnimalCard({ item, lang }: Props) {
   const [soundPlaying,  setSoundPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Pre-load voices so pickBestEnglishVoice() works on first tap
   useEffect(() => {
     loadVoices();
     window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
@@ -67,23 +55,34 @@ export function AnimalCard({ item, lang }: Props) {
     if (nameTapped || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     setNameTapped(true);
-
     const text = lang === 'en' ? item.nameEn : item.nameMm;
     const utt  = new SpeechSynthesisUtterance(text);
-
     if (lang === 'en') {
       const voice = pickBestEnglishVoice();
       if (voice) utt.voice = voice;
       utt.lang  = voice?.lang ?? 'en-GB';
-      utt.rate  = 0.82;   // measured, clear
-      utt.pitch = 1.0;    // natural — no distortion
+      utt.rate  = 0.82;
+      utt.pitch = 1.0;
     } else {
       utt.lang  = 'my-MM';
       utt.rate  = 0.75;
       utt.pitch = 1.0;
     }
-
     utt.onend = utt.onerror = () => setNameTapped(false);
+    window.speechSynthesis.speak(utt);
+  };
+
+  // Speak "[Name] is [taste]!" for fruits
+  const speakTaste = () => {
+    if (!window.speechSynthesis) { setSoundPlaying(false); return; }
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(`${item.nameEn} is ${item.taste}!`);
+    const voice = pickBestEnglishVoice();
+    if (voice) utt.voice = voice;
+    utt.lang  = voice?.lang ?? 'en-GB';
+    utt.rate  = 0.82;
+    utt.pitch = 1.0;
+    utt.onend = utt.onerror = () => setSoundPlaying(false);
     window.speechSynthesis.speak(utt);
   };
 
@@ -108,12 +107,17 @@ export function AnimalCard({ item, lang }: Props) {
       audioRef.current.currentTime = 0;
     }
 
+    // Fruits: speak taste description instead of playing a sound file
+    if (item.taste) {
+      speakTaste();
+      return;
+    }
+
+    // Animals: try MP3 → TTS fallback
     const audio = new Audio(`/sounds/${item.id}.mp3`);
     audioRef.current = audio;
-
     audio.onended = () => setSoundPlaying(false);
     audio.onerror = () => playTTSFallback();
-
     audio.play().catch(() => playTTSFallback());
   };
 
@@ -134,13 +138,31 @@ export function AnimalCard({ item, lang }: Props) {
         {primary}
       </p>
 
-      <span
-        className={`leading-none select-none cursor-pointer text-[12rem] ${soundPlaying ? 'bounce-play' : ''}`}
-        onClick={handleEmojiTap}
-        onTouchStart={handleEmojiTap}
-      >
-        {item.emoji}
-      </span>
+      <div className="flex flex-col items-center gap-4">
+        <span
+          className={`leading-none select-none cursor-pointer text-[12rem] ${soundPlaying ? 'bounce-play' : ''}`}
+          onClick={handleEmojiTap}
+          onTouchStart={handleEmojiTap}
+        >
+          {item.emoji}
+        </span>
+
+        {/* Taste badge — visible only for fruits while sound plays */}
+        {item.taste && (
+          <div
+            className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-5 py-2.5 shadow-md transition-all duration-300"
+            style={{
+              opacity: soundPlaying ? 1 : 0,
+              transform: soundPlaying ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(8px)',
+            }}
+          >
+            <span className="text-2xl">{item.tasteEmoji}</span>
+            <span className="text-base font-bold text-gray-700 select-none">
+              {item.nameEn} is {item.taste}!
+            </span>
+          </div>
+        )}
+      </div>
 
       <p key={`s-${lang}`} className="fade-up text-2xl text-gray-400 select-none text-center">
         {secondary}
