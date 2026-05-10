@@ -6,10 +6,51 @@ interface Props {
   lang: 'en' | 'mm';
 }
 
+// Known female voice name fragments across platforms
+const FEMALE_HINTS = [
+  'female', 'woman', 'girl',
+  // macOS / iOS
+  'samantha', 'karen', 'moira', 'tessa', 'victoria', 'fiona', 'kate', 'serena',
+  // Windows
+  'zira', 'hazel', 'susan',
+  // Google
+  'google uk english female',
+];
+
+function pickFemaleVoice(langPrefix: string): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+
+  // 1. Female voice matching the requested language
+  const match = voices.find(v =>
+    v.lang.startsWith(langPrefix) &&
+    FEMALE_HINTS.some(h => v.name.toLowerCase().includes(h))
+  );
+  if (match) return match;
+
+  // 2. Any female English voice
+  const enFemale = voices.find(v =>
+    v.lang.startsWith('en') &&
+    FEMALE_HINTS.some(h => v.name.toLowerCase().includes(h))
+  );
+  if (enFemale) return enFemale;
+
+  // 3. First voice for the language
+  return voices.find(v => v.lang.startsWith(langPrefix)) ?? null;
+}
+
 export function AnimalCard({ item, lang }: Props) {
-  const [nameTapped,    setNameTapped]   = useState(false);
-  const [soundPlaying,  setSoundPlaying] = useState(false);
+  const [nameTapped,   setNameTapped]  = useState(false);
+  const [soundPlaying, setSoundPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Pre-load voices as soon as the browser has them
+  useEffect(() => {
+    const load = () => window.speechSynthesis.getVoices();
+    load();
+    window.speechSynthesis.addEventListener('voiceschanged', load);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', load);
+  }, []);
 
   // Stop all audio when this card unmounts (page swipe)
   useEffect(() => {
@@ -31,7 +72,9 @@ export function AnimalCard({ item, lang }: Props) {
     );
     utt.lang  = lang === 'en' ? 'en-US' : 'my-MM';
     utt.rate  = 0.75;
-    utt.pitch = 1.0;
+    utt.pitch = 1.4;
+    const voice = pickFemaleVoice(lang === 'en' ? 'en' : 'my');
+    if (voice) utt.voice = voice;
     utt.onend = utt.onerror = () => setNameTapped(false);
     window.speechSynthesis.speak(utt);
   };
@@ -41,8 +84,10 @@ export function AnimalCard({ item, lang }: Props) {
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(item.sound);
     utt.lang  = 'en-US';
-    utt.pitch = item.pitch ?? 1.2;
-    utt.rate  = 1.0;
+    utt.pitch = item.pitch ?? 1.4;
+    utt.rate  = 0.85;
+    const voice = pickFemaleVoice('en');
+    if (voice) utt.voice = voice;
     utt.onend = utt.onerror = () => setSoundPlaying(false);
     window.speechSynthesis.speak(utt);
   };
@@ -52,7 +97,6 @@ export function AnimalCard({ item, lang }: Props) {
     if (soundPlaying) return;
     setSoundPlaying(true);
 
-    // stop any previous audio
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -62,7 +106,7 @@ export function AnimalCard({ item, lang }: Props) {
     audioRef.current = audio;
 
     audio.onended = () => setSoundPlaying(false);
-    audio.onerror = () => playTTSFallback(); // file missing → TTS fallback
+    audio.onerror = () => playTTSFallback();
 
     audio.play().catch(() => playTTSFallback());
   };
