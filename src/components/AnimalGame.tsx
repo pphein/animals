@@ -7,11 +7,12 @@ const TOTAL = animals.length;
 
 interface Props {
   lang: 'en' | 'mm';
+  initialPage?: number;
   onBack: () => void;
 }
 
-export function AnimalGame({ lang, onBack }: Props) {
-  const [page, setPage]           = useState(0);
+export function AnimalGame({ lang, initialPage = 0, onBack }: Props) {
+  const [page, setPage]           = useState(initialPage);
   const [slideClass, setSlide]    = useState('slide-from-right');
   const [animKey, setAnimKey]     = useState(0);
 
@@ -37,9 +38,15 @@ export function AnimalGame({ lang, onBack }: Props) {
           <button
             onClick={onBack}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow text-indigo-500 hover:bg-indigo-50 transition-colors cursor-pointer"
+            title="Back to list"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <polyline points="3 6 4 7 6 5"/>
+              <polyline points="3 12 4 13 6 11"/>
+              <polyline points="3 18 4 19 6 17"/>
             </svg>
           </button>
           <div>

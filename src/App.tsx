@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HomePage } from './components/HomePage';
+import { AnimalList } from './components/AnimalList';
 import { AnimalGame } from './components/AnimalGame';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -7,11 +8,12 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Screen = 'home' | 'animals';
+type Screen = 'home' | 'animalList' | 'animalGame';
 
 export default function App() {
-  const [screen, setScreen]       = useState<Screen>('home');
-  const [lang, setLang]           = useState<'en' | 'mm'>('en');
+  const [screen, setScreen]             = useState<Screen>('home');
+  const [selectedAnimal, setSelectedAnimal] = useState(0);
+  const [lang, setLang]                 = useState<'en' | 'mm'>('en');
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
@@ -30,8 +32,24 @@ export default function App() {
     if (outcome === 'accepted') setInstallPrompt(null);
   };
 
-  if (screen === 'animals') {
-    return <AnimalGame lang={lang} onBack={() => setScreen('home')} />;
+  if (screen === 'animalList') {
+    return (
+      <AnimalList
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSelect={(index) => { setSelectedAnimal(index); setScreen('animalGame'); }}
+      />
+    );
+  }
+
+  if (screen === 'animalGame') {
+    return (
+      <AnimalGame
+        lang={lang}
+        initialPage={selectedAnimal}
+        onBack={() => setScreen('animalList')}
+      />
+    );
   }
 
   return (
@@ -78,6 +96,7 @@ export default function App() {
       </div>
 
       <HomePage lang={lang} onSelect={(id) => setScreen(id as Screen)} />
+
     </div>
   );
 }

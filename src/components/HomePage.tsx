@@ -8,7 +8,7 @@ interface Category {
 }
 
 const categories: Category[] = [
-  { id: 'animals', label: 'Animals', labelMm: 'တိရစ္ဆာန်များ', emoji: '🐾', bg: '#FFF3CD', color: '#92400E' },
+  { id: 'animalList', label: 'Animals', labelMm: 'တိရစ္ဆာန်များ', emoji: '🐾', bg: '#FFF3CD', color: '#92400E' },
 ];
 
 interface Props {
