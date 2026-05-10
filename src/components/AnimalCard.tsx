@@ -6,10 +6,51 @@ interface Props {
   lang: 'en' | 'mm';
 }
 
+// Priority-ordered list of high-quality British / clear English voices
+const GB_VOICE_NAMES = [
+  // macOS / iOS — highest quality neural voices
+  'daniel', 'kate', 'serena', 'oliver',
+  // Chrome / Android
+  'google uk english female', 'google uk english male',
+  // Windows
+  'microsoft hazel', 'microsoft george', 'microsoft susan',
+];
+
+const voicesRef: { list: SpeechSynthesisVoice[] } = { list: [] };
+
+function loadVoices() {
+  voicesRef.list = window.speechSynthesis.getVoices();
+}
+
+function pickBestEnglishVoice(): SpeechSynthesisVoice | null {
+  const voices = voicesRef.list;
+  if (!voices.length) return null;
+
+  // 1. Preferred high-quality British voices by name
+  for (const hint of GB_VOICE_NAMES) {
+    const v = voices.find(v => v.name.toLowerCase().includes(hint));
+    if (v) return v;
+  }
+
+  // 2. Any en-GB voice
+  const gb = voices.find(v => v.lang === 'en-GB');
+  if (gb) return gb;
+
+  // 3. Any en-US voice
+  return voices.find(v => v.lang.startsWith('en')) ?? null;
+}
+
 export function AnimalCard({ item, lang }: Props) {
   const [nameTapped,    setNameTapped]   = useState(false);
   const [soundPlaying,  setSoundPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Pre-load voices so pickBestEnglishVoice() works on first tap
+  useEffect(() => {
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+  }, []);
 
   // Stop all audio when this card unmounts (page swipe)
   useEffect(() => {
@@ -26,12 +67,22 @@ export function AnimalCard({ item, lang }: Props) {
     if (nameTapped || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     setNameTapped(true);
-    const utt = new SpeechSynthesisUtterance(
-      lang === 'en' ? item.nameEn : item.nameMm
-    );
-    utt.lang  = lang === 'en' ? 'en-US' : 'my-MM';
-    utt.rate  = 0.7;
-    utt.pitch = 2.0;
+
+    const text = lang === 'en' ? item.nameEn : item.nameMm;
+    const utt  = new SpeechSynthesisUtterance(text);
+
+    if (lang === 'en') {
+      const voice = pickBestEnglishVoice();
+      if (voice) utt.voice = voice;
+      utt.lang  = voice?.lang ?? 'en-GB';
+      utt.rate  = 0.82;   // measured, clear
+      utt.pitch = 1.0;    // natural — no distortion
+    } else {
+      utt.lang  = 'my-MM';
+      utt.rate  = 0.75;
+      utt.pitch = 1.0;
+    }
+
     utt.onend = utt.onerror = () => setNameTapped(false);
     window.speechSynthesis.speak(utt);
   };
