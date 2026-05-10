@@ -30,8 +30,8 @@ export function AnimalCard({ item, lang }: Props) {
       lang === 'en' ? item.nameEn : item.nameMm
     );
     utt.lang  = lang === 'en' ? 'en-US' : 'my-MM';
-    utt.rate  = 0.75;
-    utt.pitch = 1.0;
+    utt.rate  = 0.7;
+    utt.pitch = 2.0;
     utt.onend = utt.onerror = () => setNameTapped(false);
     window.speechSynthesis.speak(utt);
   };
