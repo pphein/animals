@@ -8,14 +8,24 @@
   from { transform: translateX(-56px); opacity: 0; }
   to   { transform: translateX(0);     opacity: 1; }
 }
+@keyframes slide-from-bottom {
+  from { transform: translateY(56px);  opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes slide-from-top {
+  from { transform: translateY(-56px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.slide-from-right { animation: slide-from-right 0.25s ease-out; }
-.slide-from-left  { animation: slide-from-left  0.25s ease-out; }
-.fade-up          { animation: fade-up 0.2s ease-out; }
+.slide-from-right  { animation: slide-from-right  0.25s ease-out; }
+.slide-from-left   { animation: slide-from-left   0.25s ease-out; }
+.slide-from-bottom { animation: slide-from-bottom 0.25s ease-out; }
+.slide-from-top    { animation: slide-from-top    0.25s ease-out; }
+.fade-up           { animation: fade-up 0.2s ease-out; }
 
 @keyframes bounce-play {
   0%, 100% { transform: scale(1)    rotate(0deg);  }

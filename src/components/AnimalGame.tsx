@@ -18,16 +18,18 @@ export function AnimalGame({ items, title, lang, initialPage = 0, onBack }: Prop
 
   const total = items.length;
 
-  const navigate = (next: number, dir: 'left' | 'right') => {
-    setSlide(dir === 'left' ? 'slide-from-left' : 'slide-from-right');
+  const navigate = (next: number, slideFrom: string) => {
+    setSlide(slideFrom);
     setAnimKey(k => k + 1);
     setPage(next);
   };
 
-  const goNext = () => { if (page < total - 1) navigate(page + 1, 'left'); };
-  const goPrev = () => { if (page > 0)         navigate(page - 1, 'right'); };
+  const goNext = () => { if (page < total - 1) navigate(page + 1, 'slide-from-left'); };
+  const goPrev = () => { if (page > 0)         navigate(page - 1, 'slide-from-right'); };
+  const goNextV = () => { if (page < total - 1) navigate(page + 1, 'slide-from-bottom'); };
+  const goPrevV = () => { if (page > 0)         navigate(page - 1, 'slide-from-top'); };
 
-  const swipe = useSwipe(goNext, goPrev);
+  const swipe = useSwipe({ onSwipeLeft: goNext, onSwipeRight: goPrev, onSwipeUp: goNextV, onSwipeDown: goPrevV });
 
   return (
     <div
