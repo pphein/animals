@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { animals } from './data/animals';
 import { fruits } from './data/fruits';
+import { vegetables } from './data/vegetables';
 import { HomePage } from './components/HomePage';
 import { AnimalList } from './components/AnimalList';
 import { AnimalGame } from './components/AnimalGame';
@@ -10,7 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame';
+type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame' | 'vegetableList' | 'vegetableGame';
 
 export default function App() {
   const [screen, setScreen]                 = useState<Screen>('home');
@@ -78,6 +79,30 @@ export default function App() {
         lang={lang}
         initialPage={selectedIndex}
         onBack={() => setScreen('fruitList')}
+      />
+    );
+  }
+
+  if (screen === 'vegetableList') {
+    return (
+      <AnimalList
+        items={vegetables}
+        title="Vegetables"
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSelect={(i) => { setSelectedIndex(i); setScreen('vegetableGame'); }}
+      />
+    );
+  }
+
+  if (screen === 'vegetableGame') {
+    return (
+      <AnimalGame
+        items={vegetables}
+        title="Vegetables"
+        lang={lang}
+        initialPage={selectedIndex}
+        onBack={() => setScreen('vegetableList')}
       />
     );
   }
