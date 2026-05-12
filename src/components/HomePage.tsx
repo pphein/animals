@@ -11,6 +11,16 @@ const categories: Category[] = [
   { id: 'animalList',     label: 'Animals',     labelMm: 'တိရစ္ဆာန်များ', emoji: '🐾', bg: '#FFF3CD', color: '#92400E' },
   { id: 'fruitList',     label: 'Fruits',      labelMm: 'သစ်သီးများ',    emoji: '🍓', bg: '#FCE7F3', color: '#9D174D' },
   { id: 'vegetableList', label: 'Vegetables',  labelMm: 'ဟင်းသီးဟင်းရွက်', emoji: '🥦', bg: '#DCFCE7', color: '#166534' },
+  { id: 'colorList',     label: 'Colors',      labelMm: 'အရောင်များ',       emoji: '🎨', bg: '#FDF4FF', color: '#7E22CE' },
+  { id: 'shapeList',    label: 'Shapes',      labelMm: 'ပုံသဏ္ဍာန်များ',   emoji: '🔷', bg: '#EEF2FF', color: '#3730A3' },
+  { id: 'numberList',   label: 'Numbers',     labelMm: 'နံပါတ်များ',      emoji: '🔢', bg: '#FFF7ED', color: '#C2410C' },
+  { id: 'bodyPartList', label: 'Body Parts',  labelMm: 'ခန္ဓာကိုယ်အစိတ်အပိုင်း', emoji: '🧠', bg: '#FDF2F8', color: '#9D174D' },
+  { id: 'vehicleList',  label: 'Vehicles',    labelMm: 'ယာဉ်များ',              emoji: '🚗', bg: '#FEF9C3', color: '#92400E' },
+  { id: 'clothesList',  label: 'Clothes',     labelMm: 'အဝတ်အစားများ',         emoji: '👕', bg: '#EEF2FF', color: '#4338CA' },
+  { id: 'foodList',     label: 'Food',        labelMm: 'အစားအစာများ',          emoji: '🍚', bg: '#FFF7ED', color: '#9A3412' },
+  { id: 'weatherList',  label: 'Weather',     labelMm: 'ရာသီဥတု',              emoji: '🌈', bg: '#F0F9FF', color: '#0369A1' },
+  { id: 'emotionList',    label: 'Emotions',     labelMm: 'စိတ်ခံစားချက်များ',  emoji: '😊', bg: '#FEF9C3', color: '#92400E' },
+  { id: 'occupationList', label: 'Occupations',  labelMm: 'အလုပ်အကိုင်များ',   emoji: '👨‍🍳', bg: '#ECFCCB', color: '#166534' },
 ];
 
 interface Props {
