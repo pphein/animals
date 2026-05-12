@@ -13,6 +13,7 @@ import { weather } from './data/weather';
 import { emotions } from './data/emotions';
 import { occupations } from './data/occupations';
 import { alphabet } from './data/alphabet';
+import { birds } from './data/birds';
 import { phonics } from './data/phonics';
 import { HomePage } from './components/HomePage';
 import { AnimalList } from './components/AnimalList';
@@ -23,7 +24,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame' | 'vegetableList' | 'vegetableGame' | 'colorList' | 'colorGame' | 'shapeList' | 'shapeGame' | 'numberList' | 'numberGame' | 'bodyPartList' | 'bodyPartGame' | 'vehicleList' | 'vehicleGame' | 'clothesList' | 'clothesGame' | 'foodList' | 'foodGame' | 'weatherList' | 'weatherGame' | 'emotionList' | 'emotionGame' | 'occupationList' | 'occupationGame' | 'alphabetList' | 'alphabetGame' | 'phonicsList' | 'phonicsGame';
+type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame' | 'vegetableList' | 'vegetableGame' | 'colorList' | 'colorGame' | 'shapeList' | 'shapeGame' | 'numberList' | 'numberGame' | 'bodyPartList' | 'bodyPartGame' | 'vehicleList' | 'vehicleGame' | 'clothesList' | 'clothesGame' | 'foodList' | 'foodGame' | 'weatherList' | 'weatherGame' | 'emotionList' | 'emotionGame' | 'occupationList' | 'occupationGame' | 'alphabetList' | 'alphabetGame' | 'phonicsList' | 'phonicsGame' | 'birdList' | 'birdGame';
 
 export default function App() {
   const [screen, setScreen]                 = useState<Screen>('home');
@@ -379,6 +380,30 @@ export default function App() {
         lang={lang}
         initialPage={selectedIndex}
         onBack={() => setScreen('alphabetList')}
+      />
+    );
+  }
+
+  if (screen === 'birdList') {
+    return (
+      <AnimalList
+        items={birds}
+        title="Birds"
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSelect={(i) => { setSelectedIndex(i); setScreen('birdGame'); }}
+      />
+    );
+  }
+
+  if (screen === 'birdGame') {
+    return (
+      <AnimalGame
+        items={birds}
+        title="Birds"
+        lang={lang}
+        initialPage={selectedIndex}
+        onBack={() => setScreen('birdList')}
       />
     );
   }

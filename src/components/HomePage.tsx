@@ -9,6 +9,7 @@ interface Category {
 
 const categories: Category[] = [
   { id: 'animalList',     label: 'Animals',     labelMm: 'တိရစ္ဆာန်များ', emoji: '🐾', bg: '#FFF3CD', color: '#92400E' },
+  { id: 'birdList',      label: 'Birds',       labelMm: 'ငှက်များ',       emoji: '🐦', bg: '#F0F9FF', color: '#0369A1' },
   { id: 'fruitList',     label: 'Fruits',      labelMm: 'သစ်သီးများ',    emoji: '🍓', bg: '#FCE7F3', color: '#9D174D' },
   { id: 'vegetableList', label: 'Vegetables',  labelMm: 'ဟင်းသီးဟင်းရွက်', emoji: '🥦', bg: '#DCFCE7', color: '#166534' },
   { id: 'colorList',     label: 'Colors',      labelMm: 'အရောင်များ',       emoji: '🎨', bg: '#FDF4FF', color: '#7E22CE' },
