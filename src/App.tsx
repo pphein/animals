@@ -12,6 +12,8 @@ import { food } from './data/food';
 import { weather } from './data/weather';
 import { emotions } from './data/emotions';
 import { occupations } from './data/occupations';
+import { alphabet } from './data/alphabet';
+import { phonics } from './data/phonics';
 import { HomePage } from './components/HomePage';
 import { AnimalList } from './components/AnimalList';
 import { AnimalGame } from './components/AnimalGame';
@@ -21,7 +23,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame' | 'vegetableList' | 'vegetableGame' | 'colorList' | 'colorGame' | 'shapeList' | 'shapeGame' | 'numberList' | 'numberGame' | 'bodyPartList' | 'bodyPartGame' | 'vehicleList' | 'vehicleGame' | 'clothesList' | 'clothesGame' | 'foodList' | 'foodGame' | 'weatherList' | 'weatherGame' | 'emotionList' | 'emotionGame' | 'occupationList' | 'occupationGame';
+type Screen = 'home' | 'animalList' | 'animalGame' | 'fruitList' | 'fruitGame' | 'vegetableList' | 'vegetableGame' | 'colorList' | 'colorGame' | 'shapeList' | 'shapeGame' | 'numberList' | 'numberGame' | 'bodyPartList' | 'bodyPartGame' | 'vehicleList' | 'vehicleGame' | 'clothesList' | 'clothesGame' | 'foodList' | 'foodGame' | 'weatherList' | 'weatherGame' | 'emotionList' | 'emotionGame' | 'occupationList' | 'occupationGame' | 'alphabetList' | 'alphabetGame' | 'phonicsList' | 'phonicsGame';
 
 export default function App() {
   const [screen, setScreen]                 = useState<Screen>('home');
@@ -353,6 +355,54 @@ export default function App() {
         lang={lang}
         initialPage={selectedIndex}
         onBack={() => setScreen('occupationList')}
+      />
+    );
+  }
+
+  if (screen === 'alphabetList') {
+    return (
+      <AnimalList
+        items={alphabet}
+        title="Alphabet"
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSelect={(i) => { setSelectedIndex(i); setScreen('alphabetGame'); }}
+      />
+    );
+  }
+
+  if (screen === 'alphabetGame') {
+    return (
+      <AnimalGame
+        items={alphabet}
+        title="Alphabet"
+        lang={lang}
+        initialPage={selectedIndex}
+        onBack={() => setScreen('alphabetList')}
+      />
+    );
+  }
+
+  if (screen === 'phonicsList') {
+    return (
+      <AnimalList
+        items={phonics}
+        title="Phonics"
+        lang={lang}
+        onBack={() => setScreen('home')}
+        onSelect={(i) => { setSelectedIndex(i); setScreen('phonicsGame'); }}
+      />
+    );
+  }
+
+  if (screen === 'phonicsGame') {
+    return (
+      <AnimalGame
+        items={phonics}
+        title="Phonics"
+        lang={lang}
+        initialPage={selectedIndex}
+        onBack={() => setScreen('phonicsList')}
       />
     );
   }

@@ -21,6 +21,8 @@ const categories: Category[] = [
   { id: 'weatherList',  label: 'Weather',     labelMm: 'ရာသီဥတု',              emoji: '🌈', bg: '#F0F9FF', color: '#0369A1' },
   { id: 'emotionList',    label: 'Emotions',     labelMm: 'စိတ်ခံစားချက်များ',  emoji: '😊', bg: '#FEF9C3', color: '#92400E' },
   { id: 'occupationList', label: 'Occupations',  labelMm: 'အလုပ်အကိုင်များ',   emoji: '👨‍🍳', bg: '#ECFCCB', color: '#166534' },
+  { id: 'alphabetList',   label: 'Alphabet',     labelMm: 'အက္ခရာများ',         emoji: '🔤', bg: '#FFF1F2', color: '#9F1239' },
+  { id: 'phonicsList',   label: 'Phonics',      labelMm: 'အသံများ',            emoji: '🔊', bg: '#F0FDF4', color: '#166534' },
 ];
 
 interface Props {
