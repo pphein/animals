@@ -10,6 +10,13 @@ interface Category {
 const categories: Category[] = [
   { id: 'animalList',     label: 'Animals',     labelMm: 'တိရစ္ဆာန်များ', emoji: '🐾', bg: '#FFF3CD', color: '#92400E' },
   { id: 'birdList',      label: 'Birds',       labelMm: 'ငှက်များ',       emoji: '🐦', bg: '#F0F9FF', color: '#0369A1' },
+  { id: 'insectList',   label: 'Insects',     labelMm: 'ပိုးမွှားများ',   emoji: '🐛', bg: '#ECFCCB', color: '#3F6212' },
+  { id: 'seaAnimalList',  label: 'Sea Animals', labelMm: 'ပင်လယ်သတ္တဝါများ', emoji: '🐠', bg: '#E0F2FE', color: '#0369A1' },
+  { id: 'dinosaurList',   label: 'Dinosaurs',    labelMm: 'ဒိုင်နိုဆောများ',     emoji: '🦕', bg: '#FEF3C7', color: '#92400E' },
+  { id: 'farmAnimalList', label: 'Farm Animals', labelMm: 'စိုက်ပျိုးရေးသတ္တဝါများ', emoji: '🐄', bg: '#F0FDF4', color: '#166534' },
+  { id: 'sportsList',      label: 'Sports',      labelMm: 'အားကစားများ',       emoji: '⚽', bg: '#DCFCE7', color: '#166534' },
+  { id: 'instrumentList', label: 'Instruments', labelMm: 'တူရိယာများ',   emoji: '🎸', bg: '#FEF3C7', color: '#92400E' },
+  { id: 'planetList',     label: 'Planets',     labelMm: 'ဂြိုဟ်များ',    emoji: '🪐', bg: '#EDE9FE', color: '#4C1D95' },
   { id: 'fruitList',     label: 'Fruits',      labelMm: 'သစ်သီးများ',    emoji: '🍓', bg: '#FCE7F3', color: '#9D174D' },
   { id: 'vegetableList', label: 'Vegetables',  labelMm: 'ဟင်းသီးဟင်းရွက်', emoji: '🥦', bg: '#DCFCE7', color: '#166534' },
   { id: 'colorList',     label: 'Colors',      labelMm: 'အရောင်များ',       emoji: '🎨', bg: '#FDF4FF', color: '#7E22CE' },
