@@ -336,7 +336,7 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
                   ref={el => { targetRefs.current[i] = el; }}
                   onClick={() => !target.filled && speak(label(target.item), lang)}
                   aria-label={`${label(target.item)} socket`}
-                  className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl w-24 h-24 mx-auto cursor-pointer transition-colors ${missIndex === i ? 'shake-no' : ''}`}
+                  className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl w-full max-w-24 aspect-square mx-auto cursor-pointer transition-colors ${missIndex === i ? 'shake-no' : ''}`}
                   style={
                     target.filled
                       ? {

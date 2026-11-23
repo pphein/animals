@@ -17,7 +17,7 @@ export function Piano({ lang, onBack }: Props) {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col select-none">
+    <div className="force-landscape h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col select-none">
       <header className="flex items-center gap-3 px-5 pt-5 pb-3 shrink-0">
         <button
           onClick={onBack}
@@ -38,23 +38,39 @@ export function Piano({ lang, onBack }: Props) {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 flex items-center px-4 pb-6">
-        <div className="grid grid-cols-4 gap-3 w-full">
-          {pianoNotes.map((note, i) => (
-            <button
-              key={`${note.id}-${i}`}
-              onPointerDown={() => press(`${note.id}-${i}`, note.freq)}
-              aria-label={`${note.solfege} key`}
-              className={`flex flex-col items-center justify-center gap-1 rounded-3xl aspect-square shadow-md transition-transform cursor-pointer ${
-                pressedId === `${note.id}-${i}` ? 'scale-90' : 'active:scale-90'
-              }`}
-              style={{ backgroundColor: note.bg }}
-            >
-              <span className="text-3xl font-extrabold" style={{ color: note.color }}>
-                {note.solfege}
-              </span>
-            </button>
-          ))}
+      <div className="flex-1 min-h-0 flex flex-col justify-end px-3 pb-6">
+        {/* Piano body — a wooden-look base holding the row of keys, like a real toy piano. */}
+        <div
+          className="rounded-[1.75rem] p-3 shadow-2xl"
+          style={{ background: 'linear-gradient(160deg, #8a5a36 0%, #5c3a20 100%)' }}
+        >
+          <div className="flex gap-1">
+            {pianoNotes.map((note, i) => {
+              const keyId = `${note.id}-${i}`;
+              const pressed = pressedId === keyId;
+              return (
+                <button
+                  key={keyId}
+                  onPointerDown={() => press(keyId, note.freq)}
+                  aria-label={`${note.solfege} key`}
+                  className={`flex-1 flex flex-col items-center justify-end gap-2 pb-4 h-56 rounded-t-md rounded-b-2xl transition-transform cursor-pointer ${
+                    pressed ? 'translate-y-1.5' : ''
+                  }`}
+                  style={{
+                    backgroundColor: note.bg,
+                    borderBottom: `6px solid ${note.color}`,
+                    boxShadow: pressed
+                      ? 'inset 0 3px 6px rgba(0,0,0,0.25)'
+                      : '0 5px 0 rgba(0,0,0,0.12), inset 0 -10px 16px rgba(0,0,0,0.05)',
+                  }}
+                >
+                  <span className="text-xl font-extrabold" style={{ color: note.color }}>
+                    {note.solfege}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
