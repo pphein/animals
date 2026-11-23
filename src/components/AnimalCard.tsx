@@ -1,32 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GameItem } from '../data/types';
+import { initVoices, speak } from '../lib/speech';
+import { playCreatureSound } from '../lib/sfx';
 
 interface Props {
   item: GameItem;
   lang: 'en' | 'mm';
-}
-
-// Priority-ordered list of high-quality British / clear English voices
-const GB_VOICE_NAMES = [
-  'daniel', 'kate', 'serena', 'oliver',
-  'google uk english female', 'google uk english male',
-  'microsoft hazel', 'microsoft george', 'microsoft susan',
-];
-
-const voicesRef: { list: SpeechSynthesisVoice[] } = { list: [] };
-
-function loadVoices() {
-  voicesRef.list = window.speechSynthesis.getVoices();
-}
-
-function pickBestEnglishVoice(): SpeechSynthesisVoice | null {
-  const voices = voicesRef.list;
-  if (!voices.length) return null;
-  for (const hint of GB_VOICE_NAMES) {
-    const v = voices.find(v => v.name.toLowerCase().includes(hint));
-    if (v) return v;
-  }
-  return voices.find(v => v.lang === 'en-GB') ?? voices.find(v => v.lang.startsWith('en')) ?? null;
 }
 
 export function AnimalCard({ item, lang }: Props) {
@@ -34,11 +13,7 @@ export function AnimalCard({ item, lang }: Props) {
   const [soundPlaying,  setSoundPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    loadVoices();
-    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
-  }, []);
+  useEffect(() => initVoices(), []);
 
   // Stop all audio when this card unmounts (page swipe)
   useEffect(() => {
@@ -53,48 +28,25 @@ export function AnimalCard({ item, lang }: Props) {
 
   const handleNameTap = () => {
     if (nameTapped || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
     setNameTapped(true);
     const text = lang === 'en' ? item.nameEn : item.nameMm;
-    const utt  = new SpeechSynthesisUtterance(text);
-    if (lang === 'en') {
-      const voice = pickBestEnglishVoice();
-      if (voice) utt.voice = voice;
-      utt.lang  = voice?.lang ?? 'en-GB';
-      utt.rate  = 0.82;
-      utt.pitch = 1.0;
-    } else {
-      utt.lang  = 'my-MM';
-      utt.rate  = 0.75;
-      utt.pitch = 1.0;
-    }
+    const utt = speak(text, lang);
+    if (!utt) { setNameTapped(false); return; }
     utt.onend = utt.onerror = () => setNameTapped(false);
-    window.speechSynthesis.speak(utt);
   };
 
   // Speak "[Name] is [taste]!" for fruits
   const speakTaste = () => {
-    if (!window.speechSynthesis) { setSoundPlaying(false); return; }
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(`${item.nameEn} is ${item.taste}!`);
-    const voice = pickBestEnglishVoice();
-    if (voice) utt.voice = voice;
-    utt.lang  = voice?.lang ?? 'en-GB';
-    utt.rate  = 0.82;
-    utt.pitch = 1.0;
+    const utt = speak(`${item.nameEn} is ${item.taste}!`, 'en');
+    if (!utt) { setSoundPlaying(false); return; }
     utt.onend = utt.onerror = () => setSoundPlaying(false);
-    window.speechSynthesis.speak(utt);
   };
 
-  const playTTSFallback = () => {
-    if (!window.speechSynthesis) { setSoundPlaying(false); return; }
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(item.sound);
-    utt.lang  = 'en-US';
-    utt.pitch = item.pitch ?? 1.2;
-    utt.rate  = 1.0;
-    utt.onend = utt.onerror = () => setSoundPlaying(false);
-    window.speechSynthesis.speak(utt);
+  // Cartoon sound effect fallback when there's no recorded mp3 for this item —
+  // a synthesized boing/squeak pitched by item.pitch, not a voice reading the word.
+  const playCartoonFallback = () => {
+    playCreatureSound(item.pitch ?? 1.2);
+    setTimeout(() => setSoundPlaying(false), 400);
   };
 
   const handleEmojiTap = (e: React.MouseEvent | React.TouchEvent) => {
@@ -113,12 +65,12 @@ export function AnimalCard({ item, lang }: Props) {
       return;
     }
 
-    // Animals: try MP3 → TTS fallback
+    // Animals: try MP3 → cartoon sound effect fallback
     const audio = new Audio(`/sounds/${item.id}.mp3`);
     audioRef.current = audio;
     audio.onended = () => setSoundPlaying(false);
-    audio.onerror = () => playTTSFallback();
-    audio.play().catch(() => playTTSFallback());
+    audio.onerror = () => playCartoonFallback();
+    audio.play().catch(() => playCartoonFallback());
   };
 
   const primary   = lang === 'en' ? item.nameEn : item.nameMm;
