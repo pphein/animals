@@ -20,6 +20,7 @@ interface Target {
 interface Board {
   targets: Target[];
   tray: GameItem[];
+  caseVariant?: 'upper' | 'lower';
 }
 
 interface Theme {
@@ -72,6 +73,8 @@ const THEMES: Record<string, Theme> = {
     tray: 'rgba(255,255,255,0.75)',
   },
 };
+// Colors has no entry here — it falls back to THEMES.shape (see THEMES[categoryId] ?? THEMES.shape
+// below), the same plain card used for shapes, since each socket already shows the item's own swatch colour.
 
 const DRAG_THRESHOLD = 6;
 const DROP_PADDING = 24;
@@ -106,6 +109,10 @@ const ORDERED_CATEGORIES = new Set(['number', 'alphabet']);
 export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
   const theme = THEMES[categoryId] ?? THEMES.shape;
   const keepOrder = ORDERED_CATEGORIES.has(categoryId);
+  // Colors puzzle is a colour-matching game — the empty socket shows the
+  // target's own colour (instead of a plain grey hole) so a toddler can
+  // match pieces by colour alone, without needing to read the label.
+  const isColor = categoryId === 'color';
   // Alphabet and number boards show the plain bold glyph (letter or digit,
   // like the real wooden peg puzzles) instead of an unrelated object picture —
   // each glyph gets its own bold rainbow colour (stable per item, not per
@@ -126,6 +133,10 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
     items.forEach((it, i) => { map[it.id] = isNumber ? String(i + 1) : it.nameEn; });
     return map;
   }, [items, isNumber]);
+  // Alphabet glyphs are case-specific per board (see buildPages): the same
+  // letter id ('a') renders as "A" on capital-letter boards, "a" on lowercase ones.
+  const alphabetGlyph = (item: GameItem, caseVariant?: 'upper' | 'lower') =>
+    caseVariant === 'lower' ? item.id : item.id.toUpperCase();
   // Alphabet glyphs are two characters ("Aa") — a touch smaller than a lone digit
   // so wide pairs like "Mm"/"Ww" still fit comfortably in the piece/socket.
   const glyphSizeClass = isAlphabet ? 'text-4xl' : 'text-5xl';
@@ -133,16 +144,30 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
   // Split a large category into several screen-sized boards — balanced evenly
   // rather than one giant board, since e.g. animals (38 items) or the
   // alphabet (26) can't all fit on one screen. Swipe left/right between them.
+  const buildBoard = (group: GameItem[], caseVariant?: 'upper' | 'lower'): Board => ({
+    targets: (keepOrder ? group.slice() : shuffle(group)).map(item => ({ item, filled: false })),
+    tray: keepOrder ? group.slice() : shuffle(group),
+    caseVariant,
+  });
+
   const buildPages = (): Board[] => {
     const pool = keepOrder ? items.slice() : shuffle(items);
     const pageCount = Math.max(1, Math.ceil(items.length / MAX_PER_PAGE));
     const perPage = Math.ceil(items.length / pageCount);
     const groups: GameItem[][] = [];
     for (let i = 0; i < pool.length; i += perPage) groups.push(pool.slice(i, i + perPage));
-    return groups.map(group => ({
-      targets: (keepOrder ? group.slice() : shuffle(group)).map(item => ({ item, filled: false })),
-      tray: keepOrder ? group.slice() : shuffle(group),
-    }));
+
+    // Alphabet gets two full passes through A-Z — all capital-letter boards,
+    // then all lowercase-letter boards — so toddlers practice one case at a
+    // time instead of mixed "Aa" pairs.
+    if (isAlphabet) {
+      return [
+        ...groups.map(group => buildBoard(group, 'upper')),
+        ...groups.map(group => buildBoard(group, 'lower')),
+      ];
+    }
+
+    return groups.map(group => buildBoard(group));
   };
 
   const [pages, setPages]     = useState<Board[]>(() => buildPages());
@@ -165,6 +190,7 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
   const boardComplete = placedCount === board.targets.length;
   const allComplete   = pages.every(p => p.targets.every(t => t.filled));
   const totalPlaced   = pages.reduce((sum, p) => sum + p.targets.filter(t => t.filled).length, 0);
+  const totalTargets  = pages.reduce((sum, p) => sum + p.targets.length, 0);
 
   useEffect(() => {
     if (boardComplete) playCompleteFanfare();
@@ -277,7 +303,9 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
           <div>
             <h1 className="text-xl font-bold text-gray-800 leading-tight">{title} Puzzle</h1>
             <p className="text-xs text-gray-400">
-              Board {pageIndex + 1} of {pages.length} · {totalPlaced} of {items.length} placed
+              Board {pageIndex + 1} of {pages.length}
+              {board.caseVariant ? ` · ${board.caseVariant === 'upper' ? 'Capital Letters' : 'lowercase letters'}` : ''}
+              {' '}· {totalPlaced} of {totalTargets} placed
             </p>
           </div>
         </div>
@@ -308,12 +336,17 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
                   ref={el => { targetRefs.current[i] = el; }}
                   onClick={() => !target.filled && speak(label(target.item), lang)}
                   aria-label={`${label(target.item)} socket`}
-                  className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl py-4 cursor-pointer transition-colors ${missIndex === i ? 'shake-no' : ''}`}
+                  className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl w-20 h-20 mx-auto cursor-pointer transition-colors ${missIndex === i ? 'shake-no' : ''}`}
                   style={
                     target.filled
                       ? {
                           backgroundColor: useGlyphIcons ? '#fffdf7' : target.item.bg,
                           boxShadow: 'inset 0 3px 8px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.4)',
+                        }
+                      : isColor
+                      ? {
+                          backgroundColor: missIndex === i ? 'rgba(244,63,94,0.35)' : target.item.bg,
+                          boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.18), inset 0 0 0 2px rgba(100,116,139,0.3)',
                         }
                       : {
                           backgroundColor: missIndex === i ? 'rgba(244,63,94,0.35)' : theme.hole,
@@ -327,15 +360,15 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
                       className={`font-extrabold leading-none ${glyphSizeClass} ${target.filled ? 'pop-in' : ''}`}
                       style={{ color: target.filled ? glyphColors[target.item.id] : 'rgba(255,255,255,0.85)' }}
                     >
-                      {glyphText[target.item.id]}
+                      {isAlphabet ? alphabetGlyph(target.item, board.caseVariant) : glyphText[target.item.id]}
                     </span>
                   ) : (
-                    <span className={`text-4xl leading-none ${target.filled ? 'pop-in' : 'opacity-40 grayscale'}`}>
+                    <span className={`text-4xl leading-none ${target.filled || isColor ? 'pop-in' : 'opacity-40 grayscale'}`}>
                       {target.item.emoji}
                     </span>
                   )}
                   {!isAlphabet && (
-                    <span className={`text-[10px] font-semibold text-center ${target.filled ? 'text-gray-700' : 'text-white/80'}`}>
+                    <span className={`text-[10px] font-semibold text-center ${target.filled || isColor ? 'text-gray-700' : 'text-white/80'}`}>
                       {label(target.item)}
                     </span>
                   )}
@@ -369,7 +402,7 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
                 >
                   <Knob theme={theme} />
                   {useGlyphIcons ? (
-                    <span className={`font-extrabold leading-none ${glyphSizeClass} pointer-events-none`} style={{ color: glyphColors[item.id] }}>{glyphText[item.id]}</span>
+                    <span className={`font-extrabold leading-none ${glyphSizeClass} pointer-events-none`} style={{ color: glyphColors[item.id] }}>{isAlphabet ? alphabetGlyph(item, board.caseVariant) : glyphText[item.id]}</span>
                   ) : (
                     <span className="text-4xl leading-none pointer-events-none">{item.emoji}</span>
                   )}
@@ -403,7 +436,7 @@ export function PuzzleBoard({ categoryId, items, title, lang, onBack }: Props) {
         >
           <Knob theme={theme} />
           {useGlyphIcons ? (
-            <span className={`font-extrabold leading-none ${glyphSizeClass}`} style={{ color: glyphColors[draggedItem.id] }}>{glyphText[draggedItem.id]}</span>
+            <span className={`font-extrabold leading-none ${glyphSizeClass}`} style={{ color: glyphColors[draggedItem.id] }}>{isAlphabet ? alphabetGlyph(draggedItem, board.caseVariant) : glyphText[draggedItem.id]}</span>
           ) : (
             <span className="text-4xl leading-none">{draggedItem.emoji}</span>
           )}

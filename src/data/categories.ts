@@ -60,5 +60,5 @@ export const categories: CategoryDef[] = [
 ];
 
 // Categories with a drag-and-drop matching puzzle mode (see PuzzleBoard),
-// modeled after the toddler peg-puzzle toys (animals, numbers, alphabet, shapes).
-export const puzzleCategoryIds = ['animal', 'number', 'alphabet', 'shape'];
+// modeled after the toddler peg-puzzle toys (animals, numbers, alphabet, shapes, colors).
+export const puzzleCategoryIds = ['animal', 'number', 'alphabet', 'shape', 'color'];
