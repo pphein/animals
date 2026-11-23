@@ -4,13 +4,14 @@ import { HomePage } from './components/HomePage';
 import { AnimalList } from './components/AnimalList';
 import { AnimalGame } from './components/AnimalGame';
 import { PuzzleBoard } from './components/PuzzleBoard';
+import { Piano } from './components/Piano';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type View = 'home' | 'list' | 'game' | 'puzzle';
+type View = 'home' | 'list' | 'game' | 'puzzle' | 'piano';
 type Lang = 'en' | 'mm';
 
 const LANG_STORAGE_KEY = 'animal-game:lang';
@@ -86,6 +87,10 @@ export default function App() {
     );
   }
 
+  if (view === 'piano') {
+    return <Piano lang={lang} onBack={() => setView('home')} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col select-none">
       {/* Top bar */}
@@ -133,6 +138,7 @@ export default function App() {
         lang={lang}
         onSelect={(id) => { setCategoryId(id); setView('list'); }}
         onPlayPuzzle={(id) => { setCategoryId(id); setView('puzzle'); }}
+        onPlayPiano={() => setView('piano')}
       />
     </div>
   );

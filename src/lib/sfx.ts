@@ -92,6 +92,13 @@ export function playFailSound() {
   tone(c, { freq: 180, start: 0.18, duration: 0.3,  type: 'sawtooth', gain: 0.22, glideTo: 110 });
 }
 
+/** A single piano-ish key press — a fundamental tone plus a soft octave overtone. */
+export function playPianoNote(freq: number) {
+  const c = getCtx();
+  tone(c, { freq,         start: 0, duration: 0.7, type: 'sine',     gain: 0.26 });
+  tone(c, { freq: freq * 2, start: 0, duration: 0.4, type: 'triangle', gain: 0.08 });
+}
+
 /**
  * A playful cartoon "creature" sound in place of a spoken onomatopoeia —
  * a quick up-down boing/squeak, pitched by the item's existing `pitch` value

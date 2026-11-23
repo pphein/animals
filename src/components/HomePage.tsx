@@ -4,9 +4,10 @@ interface Props {
   lang: 'en' | 'mm';
   onSelect: (id: string) => void;
   onPlayPuzzle: (id: string) => void;
+  onPlayPiano: () => void;
 }
 
-export function HomePage({ lang, onSelect, onPlayPuzzle }: Props) {
+export function HomePage({ lang, onSelect, onPlayPuzzle, onPlayPiano }: Props) {
   const puzzleCategories = puzzleCategoryIds
     .map(id => categories.find(c => c.id === id))
     .filter((c): c is NonNullable<typeof c> => c !== undefined);
@@ -38,6 +39,23 @@ export function HomePage({ lang, onSelect, onPlayPuzzle }: Props) {
             </button>
           ))}
         </div>
+      </section>
+
+      <section className="px-5 pb-2">
+        <h2 className="text-sm font-bold text-indigo-400 uppercase tracking-wide mb-2">
+          🎹 {lang === 'en' ? 'Music' : 'ဂီတ'}
+        </h2>
+        <button
+          onClick={onPlayPiano}
+          aria-label={lang === 'en' ? 'Color Piano' : 'အရောင်စန္ဒရား'}
+          className="w-full flex items-center gap-3 rounded-2xl py-4 px-5 shadow-md active:scale-95 transition-transform cursor-pointer"
+          style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #f97316 20%, #eab308 40%, #22c55e 60%, #3b82f6 80%, #8b5cf6 100%)' }}
+        >
+          <span className="text-4xl leading-none">🎹</span>
+          <span className="text-lg font-bold text-white drop-shadow">
+            {lang === 'en' ? 'Color Piano' : 'အရောင်စန္ဒရား'}
+          </span>
+        </button>
       </section>
 
       <main className="flex-1 px-5 pt-4 pb-8">
